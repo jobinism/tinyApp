@@ -2,6 +2,9 @@ const express = require("express");
 const app = express();
 const port = 3005; // default port 8080
 const morgan = require('morgan');
+const cookies = require('cookie-parser')
+
+app.use(morgan('dev'));
 
 app.set("view engine", "ejs");
 
@@ -9,6 +12,10 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+const usernames = {
+  username: 'username',
+}
 
 //Get ----------------------------------------
 
@@ -34,6 +41,10 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
 });
+app.get("/login", (req, res) => {
+  console.log('logging in...')
+  res.redirect('/urls')
+})
 
 
 
@@ -63,6 +74,15 @@ function generateRandomString() {
 
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id]
+  res.redirect('/urls')
+})
+app.post("/urls/:id/edit", (req, res) => {
+  urlDatabase[req.params.id] = req.body.newLongUrl
+  res.redirect('/urls')
+})
+
+app.post("/login", (req, res) => {
+  urlDatabase[req.params.id] = req.body.username
   res.redirect('/urls')
 })
 

@@ -57,8 +57,14 @@ function generateRandomString() {
   let value = Math.random().toString(36).substring(2, 7);
   console.log("Value: ", value);
   return value;
-}
-generateRandomString();
+};
+
+//Delete -----------------------
+
+app.post("/urls/:id/delete", (req, res) => {
+  delete urlDatabase[req.params.id]
+  res.redirect('/urls')
+})
 
 app.listen(port, () => {
   console.log(`App listening on port ${port}!`);

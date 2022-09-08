@@ -4,26 +4,46 @@ const port = 3005; // default port 8080
 const morgan = require('morgan');
 const cookies = require('cookie-parser')
 
+
+//middleware ---
+
 app.use(morgan('dev'));
+app.use(cookies());
+app.use(express.urlencoded({extended: true}));
 
-app.set("view engine", "ejs");
-
+//Database ---------
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
-const usernames = {
-  username: 'username',
+const users = {
+  1: {id: 1, screenName: 'goldenEraFan', password: 'tupac1995'},
+  2: {id: 2, screenName: 'newGuy56', password: 'imNewHere'},
+  3: {id: 3, screenName: 'eaglesFan', password: 'phillySB2017'},
 }
+
+
+
+
+app.set("view engine", "ejs");
 
 //Get ----------------------------------------
 
-
-app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
-  res.render("urls_index", templateVars);
-});
+app.get("/", (req, res) => {
+  const templateVars = { 
+    urls: urlDatabase,
+    user: users[req.cookies.user_id]
+  }
+  res.cookie('first_timer', `${generateRandomString()}`)
+  console.log(req.cookies)
+  res.render('urls_index', templateVars)
+})
+// app.get("/urls", (req, res) => {
+//   const templateVars = { 
+//     urls: urlDatabase,}
+//   res.render("urls_index", templateVars);
+// });
 
 // app.get("/", (req, res) => {
 //   res.render("urls_index", templateVars);
@@ -42,8 +62,31 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 app.get("/login", (req, res) => {
-  console.log('logging in...')
-  res.redirect('/urls')
+  res.render('login')
+});
+
+app.post('/login', (req, res) => {
+  for (key in users) {
+    console.log('---')
+    console.log(key,":")
+    console.log("user:", users[key].screenName)
+    if (users[key].screenName == req.body.username) {
+      if (users[key].password == req.body.pass) {
+        // return res.send(`Welcome back ${users[key].screenName}`)
+        // res.redirect('/')
+        res.cookie('user_id', key)
+        res.redirect('/')
+      } 
+    }
+  }
+  return res.send('Username or Password do not match.')
+  // console.log(req.body);
+  // res.send('ayyy lmao')
+});
+
+app.post('/logout', (req, res) => {
+  res.clearCookie('user_id')
+  res.redirect('/')
 })
 
 
@@ -66,11 +109,11 @@ app.get("/u/:id", (req, res) => {
 
 function generateRandomString() {
   let value = Math.random().toString(36).substring(2, 7);
-  console.log("Value: ", value);
+  // console.log("Value: ", value);
   return value;
 };
 
-//Delete -----------------------
+//Delete / Edit / 404 -----------------------
 
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id]
@@ -78,11 +121,6 @@ app.post("/urls/:id/delete", (req, res) => {
 })
 app.post("/urls/:id/edit", (req, res) => {
   urlDatabase[req.params.id] = req.body.newLongUrl
-  res.redirect('/urls')
-})
-
-app.post("/login", (req, res) => {
-  urlDatabase[req.params.id] = req.body.username
   res.redirect('/urls')
 })
 

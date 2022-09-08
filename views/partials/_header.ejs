@@ -14,9 +14,17 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
-        <form action="/" method="POST"><input name="username" /><a class="nav-item nav-link" href="/login"><button>Login</button></a></form>
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+        <div class="nav-item nav-link"><% if (user) { %>
+          <h5>Welcome home,  <%=user.screenName %></h5> 
+          <form method="POST" action="logout">
+            <button>Logout</button>
+          </form>
+        <% } else { %>
+          <h5>welcome home, son</h5>
+          <button><a href="/login">Login!</a></button>
+       <% } %></div>
       </div>
     </div>
   </nav>

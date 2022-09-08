@@ -25,6 +25,9 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "bcrypt": "^5.0.1",
+    "bcryptjs": "^2.4.3",
+    "cookie-session": "^2.0.0",
     "nodemon": "^2.0.19"
   }
 }

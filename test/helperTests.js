@@ -19,6 +19,6 @@ describe('getUserByUsername', function() {
   it('should return a user with valid username', function() {
     const user = getUserByUsername("user@example.com", testUsers)
     const expectedUserID = "userRandomID";
-    assert.equal(users.id, expectedUserID)
+    assert.equal(user.id, expectedUserID)
   });
 });

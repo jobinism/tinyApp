@@ -4,13 +4,12 @@ function generateRandomString() {
   return value;
 };
 
-const getUserByUsername = (users, database) => {
+const getUserByUsername = (username, database) => {
   // console.log("inside the function:", users, screenName)
-  for (const userId in users) {
-    const user = users[userId];
-   
+  for (const userId in database) {
+    const user = database[userId];
 
-    if (user.screenName === users) {
+    if (user.screenName === username) {
       return user;
     }
   }

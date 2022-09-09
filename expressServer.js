@@ -16,17 +16,29 @@ app.use(express.urlencoded({extended: true}));
 
 //Database ---------
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userId: "9kl6d",},
+  "9sm5xK": {longURL: "http://www.google.com", userId: "b762d",}
 };
+// const randomId = generateRandomString();
 
-const randomId = generateRandomString();
+
+// 
 
 const users = {
   "b762d": {screenName: 'goldenEraFan', password: 'tupac1995'},
   "h8i35": {screenName: 'newGuy56', password: 'imNewHere'},
   "9kl6d": {screenName: 'eaglesFan', password: 'phillySB2017'},
 };
+
+const urlOfUsers = function (userId, urls) {
+  const output = {}
+    for (shortId in urls) {
+      if (urls[shortId].userId === userId) {
+        output[shortId] = urls[shortId]
+      }
+    }
+    return output;
+}
 
 app.set("view engine", "ejs");
 
@@ -37,9 +49,11 @@ app.get("/", (req, res) => {
 })
 
 app.get("/urls", (req, res) => {
+  const userId = req.cookies.user_id
+  const myUrls = urlOfUsers(userId, urlDatabase);
   const templateVars = { 
-    urls: urlDatabase,
-    user: users[req.cookies.user_id],
+    urls: myUrls,
+    user: users[userId],
   }
   res.cookie('first_timer', `${generateRandomString()}`)
   console.log(req.cookies)
@@ -57,6 +71,9 @@ app.get("/urls", (req, res) => {
 // });
 
 app.get("/urls/new", (req, res) => {
+  if (!req.cookies.user_id) {
+    return res.redirect('/login');
+  }
   const templateVars = { 
     urls: urlDatabase,
     user: users[req.cookies.user_id],
@@ -73,9 +90,10 @@ app.get("/users.json", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
+  const shortUrl = req.params.id;
   const templateVars = { 
-    id: req.params.id, 
-    longURL: urlDatabase[req.params.id],
+    id: shortUrl, 
+    longURL: urlDatabase[shortUrl].longURL,
     urls: urlDatabase,
     user: users[req.cookies.user_id],
    };
@@ -83,10 +101,16 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
+  if (req.cookies.user_id) {
+    return res.redirect('/urls');
+  }
   res.render('register')
 });
 
 app.get("/login", (req, res) => {
+  if (req.cookies.user_id) {
+    return res.redirect('/urls');
+  }
   res.render('login')
 });
 //Helper code -----------
@@ -108,7 +132,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.post("/urls", (req, res) => {
   const id = generateRandomString()
-  urlDatabase[id] = req.body.longURL;
+  const longURL = req.body.longURL
+  urlDatabase[id] = {longURL: longURL, userId: req.cookies.user_id };
+
+  console.log(urlDatabase[id])
   res.redirect(`/urls/${id}`)
 });
 app.post("/register", (req, res) => {
@@ -152,20 +179,18 @@ app.post('/login', (req, res) => {
   
 
   return res.send('Username or Password do not match.')
-  // console.log(req.body);
-  // res.send('ayyy lmao')
 });
 
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id')
-  res.redirect('/urls')
-})
+  res.redirect('/')
+});
 
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
-  console.log("id? :", req.params.id)
+  const shortUrl = req.params.id
+  const longURL = urlDatabase[shortUrl].longURL;
+  console.log("id? :", shortUrl)
   console.log("urlDatabase", urlDatabase)
-  console.log("long URL:", longURL)
   res.redirect(longURL);
 });
 
@@ -182,7 +207,11 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect('/urls')
 })
 app.post("/urls/:id/edit", (req, res) => {
-  urlDatabase[req.params.id] = req.body.newLongUrl
+  const shortUrl = req.params.id;
+  if (!req.cookies.user_id) {
+    return res.redirect('/login');
+  }
+  urlDatabase[shortUrl].longURL = req.body.newLongUrl;
   res.redirect('/urls')
 })
 // app.post("/register/:id/edit", (req, res) => {
@@ -195,3 +224,15 @@ app.post("/urls/:id/edit", (req, res) => {
 app.listen(port, () => {
   console.log(`App listening on port ${port}!`);
 });
+
+
+
+
+// const objLoop = function(obj) {
+//   let output = {}
+//   for (key in obj) {
+//     output[key] = obj[key].longURL
+//   }
+//   return 
+// };
+// const longURL = objLoop(urlDatabase);

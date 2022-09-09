@@ -2,14 +2,8 @@ const express = require("express");
 const app = express();
 const port = 3005; // default port 8080
 const morgan = require('morgan');
-// const cookies = require('cookie-parser')
 const cookieSession = require('cookie-session');
-// const helperFunctions = require('./helper');
-// console.log("helper functions: ", helperFunctions.urlOfUsers())
-// const generateRandomString = require('./helper');
-// const getUserByUsername = require('./helper')
-const { urlOfUsers, getUserByUsername, generateRandomString } = require('./helper.js')
-
+const { urlOfUsers, getUserByUsername, generateRandomString } = require('./helper.js');
 const bcrypt = require('bcryptjs');
 // const methodOverride = require('method-override');
 

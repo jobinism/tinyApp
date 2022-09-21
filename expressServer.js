@@ -1,72 +1,45 @@
 const express = require("express");
 const app = express();
-const port = 3005; // default port 8080
+const port = 3005; 
 const morgan = require('morgan');
 const cookieSession = require('cookie-session');
 const { urlOfUsers, getUserByUsername, generateRandomString } = require('./helper.js');
+const { urlDatabase, users } = require('./database.js');
 const bcrypt = require('bcryptjs');
-// const methodOverride = require('method-override');
 
 
-//middleware ---
-
+//middleware 
 app.use(morgan('dev'));
 app.use(cookieSession({
   name: 'tinyApp',
-  keys: [generateRandomString],
+  keys: [generateRandomString()],
 }));
 app.use(express.urlencoded({extended: true}));
 
-//Database ---------
-const urlDatabase = {
-  "b2xVn2": {id: "b2xVn2", longURL: "http://www.lighthouselabs.ca", userId: "9kl6d",},
-  "9sm5xK": {id: "9sm5xK", longURL: "http://www.google.com", userId: "b762d",}
-};
-
-const users = {
-  "b762d": {id: "b762d", screenName: 'goldenEraFan', password: 'tupac1995'},
-  "h8i35": {id: "h8i35", screenName: 'newGuy56', password: 'imNewHere'},
-  "9kl6d": {id: "9kl6d", screenName: 'eaglesFan', password: 'phillySB2017'},
-};
-
-// const urlOfUsers = function (userId, urls) {
-//   const output = {}
-//     for (shortId in urls) {
-//       if (urls[shortId].userId === userId) {
-//         output[shortId] = urls[shortId]
-//       }
-//     }
-//     return output;
-// }
-
 app.set("view engine", "ejs");
 
-//Get ----------------------------------------
-
 app.get("/", (req, res) => {
-  res.redirect('/urls')
-})
+  res.redirect('/urls');
+});
 
 app.get("/urls", (req, res) => {
-  const userId = req.session.userId
+  const userId = req.session.user_id;
   const myUrls = urlOfUsers(userId, urlDatabase);
-  const templateVars = { 
+  const templateVars = {
     urls: myUrls,
     user: users[userId],
-  }
-  res.cookie('first_timer', `${generateRandomString()}`)
-  console.log(req.session)
-  res.render('urls_index', templateVars)
+  };
+  res.render('urls_index', templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  if (!req.session.userId) {
+  if (!req.session.user_id) {
     return res.redirect('/login');
   }
-  const templateVars = { 
+  const templateVars = {
     urls: urlDatabase,
-    user: users[req.session.userId],
-  }
+    user: users[req.session.user_id],
+  };
   res.render("urls_new", templateVars);
 });
 
@@ -80,89 +53,73 @@ app.get("/users.json", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   const shortUrl = req.params.id;
-  const templateVars = { 
-    id: shortUrl, 
+  const templateVars = {
+    id: shortUrl,
     longURL: urlDatabase[shortUrl].longURL,
     urls: urlDatabase,
-    user: users[req.session.userId],
-   };
+    user: users[req.session.user_id],
+  };
   res.render("urls_show", templateVars);
 });
 
 app.get("/register", (req, res) => {
-  if (req.session.userId) {
+  if (req.session.user_id) {
     return res.redirect('/urls');
   }
-  res.render('register')
+  res.render('register');
 });
 
 app.get("/login", (req, res) => {
-  if (req.session.userId) {
+  if (req.session.user_id) {
     return res.redirect('/urls');
   }
-  res.render('login')
+  res.render('login');
 });
-//Helper code -----------
-// const getUserByUsername = (screenName) => {
-//   console.log("inside the function:", users, screenName)
-//   for (const userId in users) {
-//     const user = users[userId];
-   
-
-//     if (user.screenName === screenName) {
-//       return user;
-//     }
-//   }
-
-//   return null;
-// };
-
-app.use(express.urlencoded({ extended: true }));
 
 app.post("/urls", (req, res) => {
-  const id = generateRandomString()
-  const longURL = req.body.longURL
-  urlDatabase[id] = {longURL: longURL, userId: req.session.userId };
+  const id = generateRandomString();
+  const longURL = req.body.longURL;
+  urlDatabase[id] = {longURL: longURL, userId: req.session.user_id };
 
-  console.log(urlDatabase[id])
-  res.redirect(`/urls/${id}`)
+  res.redirect(`/urls/${id}`);
 });
+
 app.post("/register", (req, res) => {
-  const id = generateRandomString()
+  const id = generateRandomString();
   const screenName = req.body.screenName;
   const password = req.body.password;
 
-    if (!screenName || !password) {
-      return res.status(400).send('Please enter a valid username and password!');
-    }
+  if (!screenName || !password) {
+    return res.status(400).send('Please enter a valid username and password!');
+  }
 
-    const user = getUserByUsername(screenName);
+  const user = getUserByUsername(screenName, users);
 
-    if (user) {
-      return res.status(400).send('That username is already taken!');
-    }
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(password, salt);
+  if (user) {
+    return res.status(400).send('That username is already taken!');
+  }
+  const salt = bcrypt.genSaltSync(10);
+  const hash = bcrypt.hashSync(password, salt);
 
-    const newUser = {
-      id: id,
+  const newUser = {
+    id: id,
     screenName: screenName,
     password: hash,
   };
+
+  req.session.user_id = id;
   users[id] = newUser;
-  // console.log(newUser)
-  res.redirect('/login')
+  res.redirect('/urls');
 });
 
 app.post('/login', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
-  console.log("login:", req.body)
   if (!username || !password) {
     return res.status(400).send('Please fill all fields.');
   }
-  const user = getUserByUsername(username);
+  const user = getUserByUsername(username, users);
 
   if (!user) {
     return res.status(400).send('Username does not match!');
@@ -174,47 +131,40 @@ app.post('/login', (req, res) => {
     return res.status(400).send('Password incorrect!');
   }
 
-  req.session.userId = user.id;
+  req.session.user_id = user.id;
   res.redirect('/');
 });
 
 app.post('/logout', (req, res) => {
   req.session = null;
-  res.redirect('/')
+  res.redirect('/');
 });
 
 app.get("/u/:id", (req, res) => {
-  const shortUrl = req.params.id
+  const shortUrl = req.params.id;
   const longURL = urlDatabase[shortUrl].longURL;
-  console.log("id? :", shortUrl)
-  console.log("urlDatabase", urlDatabase)
   res.redirect(longURL);
 });
 
-// function generateRandomString() {
-//   let value = Math.random().toString(36).substring(2, 7);
-//   // console.log("Value: ", value);
-//   return value;
-// };
-
-//Delete / Edit / 404 -----------------------
+//Delete / Edit / 404
 
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id]
-  res.redirect('/urls')
-})
+  delete urlDatabase[req.params.id];
+  res.redirect('/urls');
+});
+
 app.post("/urls/:id/edit", (req, res) => {
   const shortUrl = req.params.id;
-  if (!req.session.userId) {
+  if (!req.session.user_id) {
     return res.redirect('/login');
   }
   urlDatabase[shortUrl].longURL = req.body.newLongUrl;
-  res.redirect('/urls')
-})
+  res.redirect('/urls');
+});
 
 app.get('*', (req, res) => {
-  res.status(404).redirect('https://http.dog/404.jpg')
-})
+  res.status(404).redirect('https://http.dog/404.jpg');
+});
 
 app.listen(port, () => {
   console.log(`App listening on port ${port}!`);

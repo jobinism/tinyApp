@@ -2,10 +2,17 @@
 
 TinyApp is a full stack web application built with Node and Express that allows users to shorten long URLs (à la bit.ly).
 
+1. run `git clone https://github.com/jobinism/tinyApp`
+2. run npm install
+3. run npm run start
+
 ## Final Product
 
-!["screenshot of main server file"](https://github.com/jobinism/tinyApp/blob/main/docs/serverjs.png)
-!["screenshot of /urls_index"](https://github.com/jobinism/tinyApp/blob/main/docs/urls.png)
+!["screenshot of Register Page"](https://github.com/jobinism/tinyApp/blob/main/docs/Screen%20Shot%202022-09-21%20at%208.21.20%20PM.png)
+!["screenshot of Login Page"](https://github.com/jobinism/tinyApp/blob/main/docs/Screen%20Shot%202022-09-21%20at%208.20.53%20PM.png)
+
+!["screenshot of Create a URL"](https://github.com/jobinism/tinyApp/blob/main/docs/Screen%20Shot%202022-09-21%20at%208.21.44%20PM.png)
+!["screenshot of My URLs"](https://github.com/jobinism/tinyApp/blob/main/docs/Screen%20Shot%202022-09-21%20at%208.21.55%20PM.png)
 
 ## Dependencies
 
@@ -14,6 +21,13 @@ TinyApp is a full stack web application built with Node and Express that allows 
 - EJS
 - bcryptjs
 - cookie-session
+
+## Dev Dependencies
+- Chai
+- Mocha
+- Nodemon
+- Morgan
+
 
 ## Getting Started
 

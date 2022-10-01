@@ -14,9 +14,12 @@
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
+    
     <title>Login</title>
   </head>
 <body>
+  <%- include('partials/_header') %>
+
   <form method="POST" action="/login">
     <h1>Login Form</h1>
     <p>Username: <input type="text" name="username"/></p>
@@ -38,6 +41,8 @@
   integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
   crossorigin="anonymous"
 ></script>
+<%- include('partials/_footer') %>
+
 </body>
 </html>
 

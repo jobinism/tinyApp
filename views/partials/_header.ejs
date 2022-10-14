@@ -19,7 +19,7 @@
         <div class="nav-item nav-link">
           <% if (user) { %>
           <h5>Welcome Home,  <%=user.screenName %></h5> 
-          <form method="POST" action="logout">
+          <form method="POST" action="/logout">
             <button>Logout</button>
           </form>
         <% } else { %>

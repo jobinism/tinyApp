@@ -65,6 +65,9 @@ app.get("/urls/:id", (req, res) => {
   if (!req.session.user_id) {
     return res.redirect('/login');
   }
+  if (req.session.user_id !== urlDatabase[shortUrl].userId) {
+    return res.status(401).send("This isn't yours");
+  }
 
   res.render("urls_show", templateVars);
 });
@@ -168,13 +171,14 @@ app.get("/u/:id", (req, res) => {
 //Delete / Edit / 404 - below we are running code to delete urls, edit urls and a 404 for url paths that don't match our accepted paths.
 
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id];
+  
   if (!req.session.user_id) {
     return res.redirect('/login');
   }
-  if (req.session.user_id !== urlDatabase.userId) {
-    res.status(404).redirect('https://http.dog/403.jpg')
+  if (req.session.user_id !== urlDatabase[req.params.id].userId) {
+    res.status(403).redirect('https://http.dog/403.jpg')
    }
+  delete urlDatabase[req.params.id];
   res.redirect('/urls');
 });
 
@@ -183,8 +187,8 @@ app.post("/urls/:id/edit", (req, res) => {
   if (!req.session.user_id) {
     return res.redirect('/login');
   }
-  if (req.session.user_id !== urlDatabase.userId) {
-    res.status(404).redirect('https://http.dog/403.jpg')
+  if (req.session.user_id !== urlDatabase[shortUrl].userId) {
+    res.status(403).redirect('https://http.dog/403.jpg')
    }
   urlDatabase[shortUrl].longURL = req.body.newLongUrl;
   res.redirect('/urls');
